@@ -1,0 +1,52 @@
+# React Native
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+build/
+
+# Metro bundler
+.expo/
+.expo-shared/
+
+# React Native iOS
+ios/Pods/
+ios/build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xcworkspace
+DerivedData/
+*.xcuserstate
+
+# React Native Android
+android/.gradle/
+android/app/build/
+android/build/
+*.iml
+
+# Bundle
+.bundle/
+
+# Logs
+*.log
+
+# env
+.env
+.env.local
+
+# Watchman
+.watchmanconfig
+
+# VS Code
+.vscode/
+
+# Temporary files
+*.tmp
+*.temp
