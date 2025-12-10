@@ -1,1 +1,0 @@
-C:\dev\FinanceProject\frontend\android\app\build\intermediates\cxx\Debug\z695w3a6\obj\arm64-v8a

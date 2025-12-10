@@ -1,2 +1,0 @@
-C:\Users\Dell\Desktop\3rd year\budget-buddy-app\FinanceProject\frontend\node_modules\react-native-safe-area-context\android\src\main\jni\CMakeLists.txt
-C:\Users\Dell\Desktop\3rd year\budget-buddy-app\FinanceProject\frontend\node_modules\react-native\ReactAndroid\cmake-utils\default-app-setup\CMakeLists.txt
