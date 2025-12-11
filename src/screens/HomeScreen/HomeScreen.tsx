@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, ScrollView, Image, Dimensions } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { fetchHomeData } from '../../api/homeService';
+import CustomBottomNav from '../../navigation/CustomBottomNav';
 
 // Import Tabs
 import PersonalTab from './PersonalTab';
@@ -19,7 +20,6 @@ interface HomeData {
 
 const HomeScreen = ({ navigation }: any) => {
   const [activeTab, setActiveTab] = useState('Personal');
-  const [activeBottomTab, setActiveBottomTab] = useState('Home');
   const [data, setData] = useState<HomeData | null>(null);
 
   useEffect(() => {
@@ -29,17 +29,6 @@ const HomeScreen = ({ navigation }: any) => {
     };
     loadData();
   }, []);
-
-  // Helper to handle Bottom Nav clicks
-  const handleBottomNavPress = (item: string) => {
-    if (item === 'Swap') {
-      // Navigate to Transaction Screen
-      navigation.navigate('Transactions');
-    } else {
-      // Just switch the active tab style
-      setActiveBottomTab(item);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -79,7 +68,7 @@ const HomeScreen = ({ navigation }: any) => {
       {/* CONTENT AREA */}
       <ScrollView 
         style={styles.contentContainer} 
-        contentContainerStyle={{ paddingBottom: 150 }} // Space for Bottom Nav
+        contentContainerStyle={{ paddingBottom: 120 }} // Space for Bottom Nav
         showsVerticalScrollIndicator={false}
       >
         {data ? (
@@ -93,24 +82,7 @@ const HomeScreen = ({ navigation }: any) => {
         )}
       </ScrollView>
 
-      {/* CUSTOM BOTTOM NAVIGATION (Fixed at Bottom) */}
-      <View style={styles.bottomNav}>
-        {['Home', 'Analysis', 'Swap', 'Stack', 'Profile'].map((item, index) => (
-          <TouchableOpacity 
-            key={index} 
-            style={[styles.navItem, activeBottomTab === item && styles.activeNavItem]}
-            onPress={() => handleBottomNavPress(item)}
-          >
-            <Image 
-              source={{ uri: getIcon(item) }} 
-              style={[
-                styles.navIcon, 
-                { tintColor: activeBottomTab === item ? COLORS.textDark : COLORS.textDark }
-              ]} 
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
+       <CustomBottomNav activeTab="Home" navigation={navigation} />
 
     </View>
   );
