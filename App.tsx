@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 // Import Screens
 import LaunchScreen from './src/screens/LaunchScreen/LaunchScreen';
@@ -10,27 +11,53 @@ import TransactionScreen from './src/screens/TransactionScreen/TransactionScreen
 import AddIncomeScreen from './src/screens/AddIncomeScreen/AddIncomeScreen';
 import CategoryScreen from './src/screens/CategoryScreen/CategoryScreen';
 import CreateCategoryScreen from './src/screens/CategoryScreen/CreateCategoryScreen';
-// --- NEW IMPORT ---
-import CategoryDetailScreen from './src/screens/CategoryScreen/CategoryDetailScreen'; 
+import CategoryDetailScreen from './src/screens/CategoryScreen/CategoryDetailScreen';
+
+// Auth Screens
+import SignInScreen from './src/screens/Auth/SignInScreen';
+import RegisterScreen from './src/screens/Auth/RegisterScreen';
 
 const Stack = createNativeStackNavigator();
 
-const App = () => {
+const Navigation = () => {
+  const { token, loading } = useAuth();
+
+  if (loading) {
+    return <LaunchScreen />; // Or a splash screen
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Launch" component={LaunchScreen} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Transactions" component={TransactionScreen} />
-        <Stack.Screen name="AddIncome" component={AddIncomeScreen} />
-        <Stack.Screen name="Categories" component={CategoryScreen} /> 
-        <Stack.Screen name="CreateCategory" component={CreateCategoryScreen} />
-        
-        {/* --- NEW SCREEN --- */}
-        <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
+        {!token ? (
+          // Auth Stack
+          <>
+            <Stack.Screen name="Launch" component={LaunchScreen} />
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        ) : (
+          // Main App Stack
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Transactions" component={TransactionScreen} />
+            <Stack.Screen name="AddIncome" component={AddIncomeScreen} />
+            <Stack.Screen name="Categories" component={CategoryScreen} />
+            <Stack.Screen name="CreateCategory" component={CreateCategoryScreen} />
+            <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <Navigation />
+    </AuthProvider>
   );
 };
 

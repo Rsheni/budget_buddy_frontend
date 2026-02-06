@@ -1,5 +1,6 @@
-//const API_URL = 'http://10.0.2.2:5000/api/categories'; 
-const API_URL = 'http://localhost:5000/api/categories';
+import { API_URL as BASE_URL } from '../context/AuthContext';
+
+const API_URL = `${BASE_URL}/categories`;
 
 export const fetchCategories = async (type: string) => {
   try {
@@ -38,7 +39,7 @@ export const updateCategory = async (id: string, data: any) => {
 
 export const deleteCategory = async (id: string) => {
   try {
-    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-    return true;
+    const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    return response.ok;
   } catch (error) { return false; }
 };

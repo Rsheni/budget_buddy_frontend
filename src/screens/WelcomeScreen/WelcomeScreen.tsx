@@ -15,32 +15,30 @@ const WelcomeScreen = ({ navigation }: any) => {
       <StatusBar backgroundColor={COLORS.background} barStyle="dark-content" />
 
       <View style={styles.contentContainer}>
-        <Image 
-          source={{ uri: 'https://img.icons8.com/ios-filled/100/00D09C/bar-chart.png' }} 
-          style={styles.logo} 
+        <Image
+          source={{ uri: 'https://img.icons8.com/ios-filled/100/00D09C/bar-chart.png' }}
+          style={styles.logo}
         />
-        
+
         <Text style={styles.title}>BudgetBuddy</Text>
         <Text style={styles.subtitle}>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.
         </Text>
 
         <View style={styles.buttonContainer}>
-          {/* UPDATED BUTTON HERE */}
-          <CustomButton 
-            title="Log In" 
-            onPress={handleLogin} 
-          />
-          
-          <CustomButton 
-            title="Sign Up" 
-            variant="secondary"
-            onPress={() => console.log("Sign Up Pressed")} 
+          <CustomButton
+            title="Log In"
+            iconName="login"
+            onPress={() => navigation.navigate('SignIn')}
           />
 
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          </TouchableOpacity>
+          <CustomButton
+            title="Sign Up"
+            variant="secondary"
+            iconName="account-plus"
+            onPress={() => navigation.navigate('Register')}
+          />
+
         </View>
       </View>
     </View>
@@ -50,7 +48,7 @@ const WelcomeScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background, 
+    backgroundColor: COLORS.background,
   },
   contentContainer: {
     flex: 1,
