@@ -212,6 +212,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { COLORS } from '../../constants/colors';
 import { fetchTransactions } from '../../api/transactionService';
 import CustomBottomNav from '../../navigation/CustomBottomNav';
+import BalanceCard from '../../components/Home/BalanceCard';
 
 const TransactionScreen = () => {
   const navigation = useNavigation<any>();
@@ -251,6 +252,12 @@ const TransactionScreen = () => {
 
   const isExpense = viewType === 'expense';
 
+  // Calculate Savings Percentage
+  const income = data?.currentMonthIncome || 0;
+  const expense = data?.currentMonthExpense || 0;
+  const balance = income - expense;
+  const savingsPercent = income > 0 ? Math.max(0, Math.min(100, Math.round((balance / income) * 100))) : 0;
+
   return (
     <View style={styles.container}>
 
@@ -265,17 +272,11 @@ const TransactionScreen = () => {
         </View>
 
         {/* BALANCE */}
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balanceLabel}>Current Balance Of Your Wallet</Text>
-          <Text style={styles.balanceAmount}>
-            Rs. {data?.balance?.toLocaleString() || "0"}
-          </Text>
-
-          <View style={styles.progressBarBg}>
-            <View style={styles.progressPill}><Text style={styles.progressText}>30%</Text></View>
-            <Text style={styles.targetText}>Rs. {data?.currentMonthIncome?.toLocaleString() || "0"}</Text>
-          </View>
-        </View>
+        <BalanceCard
+          balance={data?.balance || 0}
+          income={data?.currentMonthIncome || 0}
+          expense={data?.currentMonthExpense || 0}
+        />
 
         {/* STATS CARDS */}
         <View style={styles.statsRow}>
@@ -346,27 +347,36 @@ const TransactionScreen = () => {
         {showPicker && <DateTimePicker value={currentDate} mode="date" display="default" onChange={onDateChange} />}
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150 }}>
-          {data?.transactions?.map((item: any) => (
-            <TouchableOpacity
-              key={item._id}
-              style={styles.row}
-              onPress={() => navigation.navigate('AddIncome', { incomeToEdit: item, type: viewType })}
-            >
-              <View style={styles.iconBox}><Text style={{ fontSize: 22 }}>{isExpense ? '💸' : '💰'}</Text></View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.rowTitle}>{item.description}</Text>
-                <Text style={styles.rowPercent}>{new Date(item.date).toLocaleDateString()}</Text>
-                <View style={{ flexDirection: 'row', marginTop: 2 }}>
-                  {item.isRecurring && <Text style={{ fontSize: 10, color: COLORS.primary, marginRight: 8 }}>↻ {item.recurringFrequency}</Text>}
-                  {item.receiptUrl ? <Text style={{ fontSize: 10, color: COLORS.blue }}>📎 Bill Attached</Text> : null}
-                </View>
-              </View>
+          {data?.transactions?.map((item: any) => {
+            // Date Formatting
+            const dateObj = new Date(item.date);
+            const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-              <Text style={[styles.rowAmount, isExpense && { color: '#FF4D4D' }]}>
-                Rs. {item.amount}
-              </Text>
-            </TouchableOpacity>
-          ))}
+            return (
+              <TouchableOpacity
+                key={item._id}
+                style={styles.row}
+                onPress={() => navigation.navigate('AddIncome', { incomeToEdit: item, type: viewType })}
+              >
+                <View style={styles.iconBox}><Text style={{ fontSize: 22 }}>{isExpense ? '💸' : '💰'}</Text></View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowTitle}>{item.description}</Text>
+                  {/* Date - Time Format */}
+                  <Text style={styles.rowPercent}>{`${dateStr} - ${timeStr}`}</Text>
+                  <View style={{ flexDirection: 'row', marginTop: 2 }}>
+                    {item.isRecurring && <Text style={{ fontSize: 10, color: COLORS.primary, marginRight: 8 }}>↻ {item.recurringFrequency}</Text>}
+                    {item.receiptUrl ? <Text style={{ fontSize: 10, color: COLORS.blue }}>📎 Bill Attached</Text> : null}
+                  </View>
+                </View>
+
+                {/* Amount: Black Color, Minus for Expense */}
+                <Text style={[styles.rowAmount, { color: COLORS.textDark }]}>
+                  {isExpense ? '- ' : ''}Rs. {item.amount}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
 
           {(!data?.transactions || data.transactions.length === 0) && (
             <Text style={{ textAlign: 'center', marginTop: 30, color: '#888' }}>

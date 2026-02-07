@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, ScrollView, Image, Dimensions } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Image, Dimensions } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../../constants/colors';
 import { fetchHomeData } from '../../api/homeService';
 import CustomBottomNav from '../../navigation/CustomBottomNav';
@@ -25,18 +26,26 @@ const HomeScreen = ({ navigation }: any) => {
   const [activeTab, setActiveTab] = useState('Personal');
   const [data, setData] = useState<HomeData | null>(null);
 
-  useEffect(() => {
-    const loadData = async () => {
-      const result = await fetchHomeData();
-      setData(result);
-    };
-    loadData();
-  }, []);
+  // Use Focus Effect to reload data when screen comes into focus (e.g., after adding transaction)
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
+        const result = await fetchHomeData();
+        setData(result);
+      };
+      loadData();
+    }, [])
+  );
 
   const handleLogout = async () => {
     await logout();
-    // Navigation should automatically handle this if utilizing a switch navigator or conditional rendering based on auth state
-    // If not, we might need navigation.replace('Auth');
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
   };
 
   return (
@@ -48,7 +57,7 @@ const HomeScreen = ({ navigation }: any) => {
         <View style={styles.headerContent}>
           <View>
             <Text style={styles.greeting}>Hi, Welcome Back</Text>
-            <Text style={styles.subGreeting}>Good Morning</Text>
+            <Text style={styles.subGreeting}>{getGreeting()}</Text>
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -63,6 +72,9 @@ const HomeScreen = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* 1. BALANCE (Dynamic) */}
+
 
         {/* TOP TAB SWITCHER (X=35) */}
         <View style={styles.tabContainer}>
@@ -142,6 +154,28 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center', alignItems: 'center'
   },
+
+  // Progress Bar Styles
+  progressBarBg: {
+    height: 35,
+    backgroundColor: '#1E1E1E',
+    borderRadius: 17.5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 5,
+    justifyContent: 'space-between'
+  },
+  progressPill: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 10,
+    height: 25,
+    borderRadius: 12.5,
+    justifyContent: 'center',
+    minWidth: 40,
+    alignItems: 'center'
+  },
+  progressText: { fontSize: 12, fontWeight: 'bold', color: COLORS.textDark },
+  targetText: { color: COLORS.white, fontSize: 12, marginRight: 10 },
 
   // Tab Styles
   tabContainer: {

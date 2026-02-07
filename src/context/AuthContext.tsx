@@ -13,6 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 // API URL - Change to your local IP for physical device testing
+//export const API_URL = 'http://10.0.2.2:5000/api';
 export const API_URL = 'http://localhost:5000/api';
 
 
