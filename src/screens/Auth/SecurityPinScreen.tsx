@@ -57,13 +57,15 @@ const SecurityPinScreen = ({ navigation, route }: any) => {
                 Alert.alert('Info', 'Password reset logic to be finalized.');
                 navigation.navigate('ResetPassword', { email });
             } else {
-                const response = await axios.post(`${API_URL}/auth/verify-email`, {
+                const response = await axios.post(`${API_URL}/auth/verify-pin`, {
                     email,
-                    code: fullPin,
+                    pin: fullPin,
                 });
 
-                Alert.alert('Success', 'Email verified successfully!');
-                await login(response.data);
+                if (response.data.token) {
+                    Alert.alert('Success', 'Email verified successfully!');
+                    await login(response.data);
+                }
             }
         } catch (error: any) {
             Alert.alert('Verification Failed', error.response?.data?.message || 'Invalid code');

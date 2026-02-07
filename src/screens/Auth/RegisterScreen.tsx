@@ -47,9 +47,9 @@ const RegisterScreen = ({ navigation }: any) => {
                 password,
             });
 
-            if (response.data.token) {
-                Alert.alert('Success', 'Account created successfully!');
-                await login(response.data); // Auto-login
+            if (response.status === 201) {
+                Alert.alert('Success', 'Verification code sent to your email!');
+                navigation.navigate('SecurityPin', { email });
             }
         } catch (error: any) {
             console.error('Registration error:', error);
