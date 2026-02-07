@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, Scro
 import { COLORS } from '../../constants/colors';
 import { fetchHomeData } from '../../api/homeService';
 import CustomBottomNav from '../../navigation/CustomBottomNav';
+import { useAuth } from '../../context/AuthContext';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // Import Tabs
 import PersonalTab from './PersonalTab';
@@ -19,6 +21,7 @@ interface HomeData {
 }
 
 const HomeScreen = ({ navigation }: any) => {
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('Personal');
   const [data, setData] = useState<HomeData | null>(null);
 
@@ -30,6 +33,12 @@ const HomeScreen = ({ navigation }: any) => {
     loadData();
   }, []);
 
+  const handleLogout = async () => {
+    await logout();
+    // Navigation should automatically handle this if utilizing a switch navigator or conditional rendering based on auth state
+    // If not, we might need navigation.replace('Auth');
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
@@ -37,21 +46,29 @@ const HomeScreen = ({ navigation }: any) => {
       {/* HEADER SECTION */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-           <View>
-             <Text style={styles.greeting}>Hi, Welcome Back</Text>
-             <Text style={styles.subGreeting}>Good Morning</Text>
-           </View>
-           {/* Notification Icon (X=364, Y=61) */}
-           <View style={styles.bellIcon}>
-             <Image source={{ uri: 'https://img.icons8.com/ios/50/ffffff/appointment-reminders.png' }} style={{ width: 24, height: 24 }} />
-           </View>
+          <View>
+            <Text style={styles.greeting}>Hi, Welcome Back</Text>
+            <Text style={styles.subGreeting}>Good Morning</Text>
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {/* Notification Icon */}
+            <View style={[styles.bellIcon, { marginRight: 10 }]}>
+              <Image source={{ uri: 'https://img.icons8.com/ios/50/ffffff/appointment-reminders.png' }} style={{ width: 24, height: 24 }} />
+            </View>
+
+            {/* Logout Button */}
+            <TouchableOpacity style={styles.bellIcon} onPress={handleLogout}>
+              <Icon name="logout" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* TOP TAB SWITCHER (X=35) */}
         <View style={styles.tabContainer}>
           {['Personal', 'Goal Status', 'Shared'].map((tab) => (
-            <TouchableOpacity 
-              key={tab} 
+            <TouchableOpacity
+              key={tab}
               style={styles.tabButton}
               onPress={() => setActiveTab(tab)}
             >
@@ -66,8 +83,8 @@ const HomeScreen = ({ navigation }: any) => {
       </View>
 
       {/* CONTENT AREA */}
-      <ScrollView 
-        style={styles.contentContainer} 
+      <ScrollView
+        style={styles.contentContainer}
         contentContainerStyle={{ paddingBottom: 120 }} // Space for Bottom Nav
         showsVerticalScrollIndicator={false}
       >
@@ -82,7 +99,7 @@ const HomeScreen = ({ navigation }: any) => {
         )}
       </ScrollView>
 
-       <CustomBottomNav activeTab="Home" navigation={navigation} />
+      <CustomBottomNav activeTab="Home" navigation={navigation} />
 
     </View>
   );
@@ -90,7 +107,7 @@ const HomeScreen = ({ navigation }: any) => {
 
 // Helper for Icons (Replace URIs with local assets if you have them)
 const getIcon = (name: string) => {
-  switch(name) {
+  switch (name) {
     case 'Home': return 'https://img.icons8.com/ios-filled/50/000000/home.png';
     case 'Analysis': return 'https://img.icons8.com/ios/50/000000/bar-chart.png';
     case 'Swap': return 'https://img.icons8.com/ios/50/000000/replace.png';
@@ -102,13 +119,13 @@ const getIcon = (name: string) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  
+
   // Header Styles
   header: {
     backgroundColor: COLORS.primary,
     paddingTop: 50, // Status Bar Space
     paddingBottom: 20,
-    
+
     paddingHorizontal: 35, // X=35 Alignment
   },
   headerContent: {
@@ -119,11 +136,11 @@ const styles = StyleSheet.create({
   },
   greeting: { fontSize: 20, fontWeight: 'bold', color: COLORS.textDark, fontFamily: 'sans-serif-medium' },
   subGreeting: { fontSize: 14, color: COLORS.textMedium, opacity: 0.8 },
-  bellIcon: { 
-    width: 40, height: 40, 
-    borderRadius: 12, 
-    backgroundColor: 'rgba(255,255,255,0.2)', 
-    justifyContent: 'center', alignItems: 'center' 
+  bellIcon: {
+    width: 40, height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center', alignItems: 'center'
   },
 
   // Tab Styles

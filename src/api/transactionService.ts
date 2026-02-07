@@ -7,7 +7,7 @@
 //     if (categoryId) {
 //       url += `&categoryId=${categoryId}`;
 //     }
-    
+
 //     const response = await fetch(url);
 //     return await response.json();
 //   } catch (error) {
@@ -64,7 +64,7 @@ export const fetchTransactions = async (month: number, year: number, type: strin
     let url = `${API_URL}?month=${month}&year=${year}&type=${type}`;
     if (categoryId) url += `&categoryId=${categoryId}`;
     if (search) url += `&search=${encodeURIComponent(search)}`; // ✨ Handle Search
-    
+
     const response = await fetch(url);
     return await response.json();
   } catch (error) {
@@ -75,10 +75,17 @@ export const fetchTransactions = async (month: number, year: number, type: strin
 
 export const addIncome = async (data: any) => {
   try {
+    const isFormData = data instanceof FormData;
+    const headers: any = {};
+
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetch(`${API_URL}/add`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      headers: headers,
+      body: isFormData ? data : JSON.stringify(data)
     });
     return await response.json();
   } catch (error) { return null; }

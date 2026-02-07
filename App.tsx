@@ -16,6 +16,7 @@ import CategoryDetailScreen from './src/screens/CategoryScreen/CategoryDetailScr
 // Auth Screens
 import SignInScreen from './src/screens/Auth/SignInScreen';
 import RegisterScreen from './src/screens/Auth/RegisterScreen';
+import SecurityPinScreen from './src/screens/Auth/SecurityPinScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,7 @@ const Navigation = () => {
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
             <Stack.Screen name="SignIn" component={SignInScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="SecurityPin" component={SecurityPinScreen} />
           </>
         ) : (
           // Main App Stack
