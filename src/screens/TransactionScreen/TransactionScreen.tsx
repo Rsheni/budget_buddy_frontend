@@ -245,7 +245,7 @@ const TransactionScreen = () => {
 
   const onDateChange = (event: any, selectedDate?: Date) => {
     setShowPicker(false);
-    if (selectedDate) {
+    if (event.type === 'set' && selectedDate) {
       setCurrentDate(selectedDate);
     }
   };

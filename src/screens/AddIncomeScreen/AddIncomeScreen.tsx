@@ -80,7 +80,9 @@ const AddIncomeScreen = ({ navigation, route }: any) => {
 
   const onDateChange = (event: any, selectedDate?: Date) => {
     setShowPicker(false);
-    if (selectedDate) setDate(selectedDate);
+    if (event.type === 'set' && selectedDate) {
+      setDate(selectedDate);
+    }
   };
 
   const handleSave = async () => {
