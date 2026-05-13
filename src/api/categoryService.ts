@@ -1,10 +1,12 @@
-import { API_URL as BASE_URL } from '../context/AuthContext';
-
-const API_URL = `${BASE_URL}/categories`;
+import { API_URL } from '../constants/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const fetchCategories = async (type: string) => {
   try {
-    const response = await fetch(`${API_URL}?type=${type}`);
+    const token = await AsyncStorage.getItem('token');
+    const response = await fetch(`${API_URL}/categories?type=${type}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
     return await response.json();
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -14,7 +16,7 @@ export const fetchCategories = async (type: string) => {
 
 export const createCategory = async (data: any) => {
   try {
-    const response = await fetch(`${API_URL}/add`, {
+    const response = await fetch(`${API_URL}/categories/add`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -28,7 +30,7 @@ export const createCategory = async (data: any) => {
 
 export const updateCategory = async (id: string, data: any) => {
   try {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await fetch(`${API_URL}/categories/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -39,7 +41,7 @@ export const updateCategory = async (id: string, data: any) => {
 
 export const deleteCategory = async (id: string) => {
   try {
-    const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    const response = await fetch(`${API_URL}/categories/${id}`, { method: 'DELETE' });
     return response.ok;
   } catch (error) { return false; }
 };
