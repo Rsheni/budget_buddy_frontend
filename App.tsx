@@ -12,6 +12,15 @@ import AddIncomeScreen from './src/screens/AddIncomeScreen/AddIncomeScreen';
 import CategoryScreen from './src/screens/CategoryScreen/CategoryScreen';
 import CreateCategoryScreen from './src/screens/CategoryScreen/CreateCategoryScreen';
 import CategoryDetailScreen from './src/screens/CategoryScreen/CategoryDetailScreen';
+import CreateGroupScreen from './src/screens/GroupScreen/CreateGroupScreen';
+import GroupListScreen from './src/screens/GroupScreen/GroupListScreen';
+import GroupDetailScreen from './src/screens/GroupScreen/GroupDetailScreen';
+import GroupSettingsScreen from './src/screens/GroupScreen/GroupSettingsScreen';
+import AddGroupExpenseScreen from './src/screens/GroupScreen/AddGroupExpenseScreen';
+import InvitationPreviewScreen from './src/screens/GroupScreen/InvitationPreviewScreen';
+import SettleUpScreen from './src/screens/GroupScreen/SettleUpScreen';
+import SettlePaymentScreen from './src/screens/GroupScreen/SettlePaymentScreen';
+import SettlementHistoryScreen from './src/screens/GroupScreen/SettlementHistoryScreen';
 
 // Auth Screens
 import SignInScreen from './src/screens/Auth/SignInScreen';
@@ -48,6 +57,15 @@ const Navigation = () => {
             <Stack.Screen name="Categories" component={CategoryScreen} />
             <Stack.Screen name="CreateCategory" component={CreateCategoryScreen} />
             <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
+            <Stack.Screen name="Groups" component={GroupListScreen} />
+            <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
+            <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+            <Stack.Screen name="GroupSettings" component={GroupSettingsScreen} />
+            <Stack.Screen name="AddGroupExpense" component={AddGroupExpenseScreen} />
+            <Stack.Screen name="InvitationPreview" component={InvitationPreviewScreen} />
+            <Stack.Screen name="SettleUp" component={SettleUpScreen} />
+            <Stack.Screen name="SettlePayment" component={SettlePaymentScreen} />
+            <Stack.Screen name="SettlementHistory" component={SettlementHistoryScreen} />
           </>
         )}
       </Stack.Navigator>

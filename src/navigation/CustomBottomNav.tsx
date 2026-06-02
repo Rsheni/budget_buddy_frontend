@@ -9,14 +9,13 @@ interface BottomNavProps {
 
 const CustomBottomNav = ({ activeTab, navigation }: BottomNavProps) => {
 
-  const menuItems = ['Home', 'Analysis', 'Swap', 'Stack', 'Profile'];
+  const menuItems = ['Home', 'Analysis', 'Groups', 'Stack', 'Profile'];
 
   const handlePress = (item: string) => {
     if (item === 'Home') {
       navigation.navigate('Home');
-    } else if (item === 'Swap') {
-      // Navigate to Transaction List
-      navigation.navigate('Transactions');
+    } else if (item === 'Groups') {
+      navigation.navigate('Groups');
     } else if (item === 'Stack') {
       // Navigate to Category List (This is the 4th Icon)
       navigation.navigate('Categories');
@@ -29,7 +28,7 @@ const CustomBottomNav = ({ activeTab, navigation }: BottomNavProps) => {
     switch(name) {
       case 'Home': return 'https://img.icons8.com/ios-filled/50/000000/home.png';
       case 'Analysis': return 'https://img.icons8.com/ios/50/000000/bar-chart.png';
-      case 'Swap': return 'https://img.icons8.com/ios/50/000000/replace.png';
+      case 'Groups': return 'https://img.icons8.com/ios-filled/50/000000/user-group-man-man.png';
       case 'Stack': return 'https://img.icons8.com/ios/50/000000/layers.png';
       case 'Profile': return 'https://img.icons8.com/ios/50/000000/user.png';
       default: return '';
