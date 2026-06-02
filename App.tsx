@@ -12,6 +12,10 @@ import AddIncomeScreen from './src/screens/AddIncomeScreen/AddIncomeScreen';
 import CategoryScreen from './src/screens/CategoryScreen/CategoryScreen';
 import CreateCategoryScreen from './src/screens/CategoryScreen/CreateCategoryScreen';
 import CategoryDetailScreen from './src/screens/CategoryScreen/CategoryDetailScreen';
+import GoalsDashboardScreen from './src/screens/GoalsDashboardScreen/GoalsDashboardScreen';
+import GoalDetailsScreen from './src/screens/GoalDetailsScreen/GoalDetailsScreen';
+import EditGoalScreen from './src/screens/EditGoalScreen/EditGoalScreen';
+import CreateGoalScreen from './src/screens/CreateGoalScreen/CreateGoalScreen';
 import CreateGroupScreen from './src/screens/GroupScreen/CreateGroupScreen';
 import GroupListScreen from './src/screens/GroupScreen/GroupListScreen';
 import GroupDetailScreen from './src/screens/GroupScreen/GroupDetailScreen';
@@ -57,6 +61,10 @@ const Navigation = () => {
             <Stack.Screen name="Categories" component={CategoryScreen} />
             <Stack.Screen name="CreateCategory" component={CreateCategoryScreen} />
             <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
+            <Stack.Screen name="GoalsDashboard" component={GoalsDashboardScreen} />
+            <Stack.Screen name="GoalDetails" component={GoalDetailsScreen} />
+            <Stack.Screen name="EditGoal" component={EditGoalScreen} />
+            <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
             <Stack.Screen name="Groups" component={GroupListScreen} />
             <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
             <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />

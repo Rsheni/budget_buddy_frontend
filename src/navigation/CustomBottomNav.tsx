@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS } from '../constants/colors';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 interface BottomNavProps {
   activeTab: string;
@@ -9,6 +10,7 @@ interface BottomNavProps {
 
 const CustomBottomNav = ({ activeTab, navigation }: BottomNavProps) => {
 
+<<<<<<< HEAD
   const menuItems = ['Home', 'Analysis', 'Groups', 'Stack', 'Profile'];
 
   const handlePress = (item: string) => {
@@ -33,25 +35,52 @@ const CustomBottomNav = ({ activeTab, navigation }: BottomNavProps) => {
       case 'Profile': return 'https://img.icons8.com/ios/50/000000/user.png';
       default: return '';
     }
+=======
+  const menuItems = [
+    { name: 'Home', icon: 'home' },
+    { name: 'Stats', icon: 'stats-chart' },
+    { name: 'Goals', icon: 'flag' },
+    { name: 'Groups', icon: 'people' },
+    { name: 'Wallets', icon: 'layers' },
+    { name: 'Profile', icon: 'person' },
+  ];
+
+  const handlePress = (item: string) => {
+    // If exact mapping is required for old screen names, map them back
+    // However depending on the new routes:
+    if (item === 'Home') navigation.navigate('Home');
+    else if (item === 'Transactions' || item === 'Stats') navigation.navigate('Transactions');
+    else if (item === 'Categories' || item === 'Wallets') navigation.navigate('Categories');
+    else if (item === 'Goals') navigation.navigate('GoalsDashboard');
+    else navigation.navigate('Home'); // fallback
+>>>>>>> a953567fb935e3e82369509be30a665ece9da1f8
   };
 
   return (
     <View style={styles.bottomNav}>
-      {menuItems.map((item, index) => (
-        <TouchableOpacity 
-          key={index} 
-          style={[styles.navItem, activeTab === item && styles.activeNavItem]}
-          onPress={() => handlePress(item)}
-        >
-          <Image 
-            source={{ uri: getIcon(item) }} 
-            style={[
-              styles.navIcon, 
-              { tintColor: activeTab === item ? COLORS.textDark : COLORS.textDark }
-            ]} 
-          />
-        </TouchableOpacity>
-      ))}
+      {menuItems.map((item, index) => {
+        const isActive = activeTab === item.name;
+        // Temporary logic since HomeScreen provides 'Home' but what if we pass 'Goals' directly?
+        // We'll fall back to styling it active if selected
+        const tintColor = isActive ? '#00D09E' : '#9BA4B5';
+
+        return (
+          <TouchableOpacity 
+            key={index} 
+            style={styles.navItem}
+            onPress={() => handlePress(item.name)}
+          >
+            <Icon 
+              name={item.icon} 
+              size={24} 
+              color={tintColor} 
+            />
+            <Text style={[styles.navText, { color: tintColor, fontWeight: isActive ? '600' : '500' }]}>
+              {item.name}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 };
@@ -69,7 +98,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     elevation: 20, 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -5 },
@@ -78,18 +107,13 @@ const styles = StyleSheet.create({
     zIndex: 1000 
   },
   navItem: {
-    width: 50,
-    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 25,
+    flex: 1, // evenly space all 6 items
   },
-  activeNavItem: {
-    backgroundColor: COLORS.primary, 
-  },
-  navIcon: {
-    width: 24,
-    height: 24,
+  navText: {
+    fontSize: 10,
+    marginTop: 4,
   }
 });
 

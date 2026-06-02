@@ -1,8 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// API URL
-//const API_URL = 'http://10.0.2.2:5000/api/transactions';
-const API_URL = 'http://localhost:5000/api/transactions';
+import { API_URL } from '../constants/config';
 
 // Helper to get headers with Token
 const getAuthHeaders = async (isFormData = false) => {
@@ -18,7 +15,7 @@ const getAuthHeaders = async (isFormData = false) => {
 
 export const fetchTransactions = async (month: number, year: number, type: string, categoryId?: string, search?: string) => {
   try {
-    let url = `${API_URL}?month=${month}&year=${year}&type=${type}`;
+    let url = `${API_URL}/transactions?month=${month}&year=${year}&type=${type}`;
     if (categoryId) url += `&categoryId=${categoryId}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
 
@@ -36,7 +33,7 @@ export const addIncome = async (data: any) => {
     const isFormData = data instanceof FormData;
     const headers = await getAuthHeaders(isFormData);
 
-    const response = await fetch(`${API_URL}/add`, {
+    const response = await fetch(`${API_URL}/transactions/add`, {
       method: 'POST',
       headers: headers,
       body: isFormData ? data : JSON.stringify(data)
@@ -48,7 +45,7 @@ export const addIncome = async (data: any) => {
 export const updateIncome = async (id: string, data: any) => {
   try {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await fetch(`${API_URL}/transactions/${id}`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(data)
@@ -60,7 +57,7 @@ export const updateIncome = async (id: string, data: any) => {
 export const deleteIncome = async (id: string) => {
   try {
     const headers = await getAuthHeaders();
-    await fetch(`${API_URL}/${id}`, {
+    await fetch(`${API_URL}/transactions/${id}`, {
       method: 'DELETE',
       headers: headers
     });

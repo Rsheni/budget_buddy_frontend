@@ -103,7 +103,7 @@ const HomeScreen = ({ navigation }: any) => {
         {data ? (
           <>
             {activeTab === 'Personal' && <PersonalTab data={data.personal} />}
-            {activeTab === 'Goal Status' && <GoalTab data={data.goals} />}
+            {activeTab === 'Goal Status' && <GoalTab data={data.goals} navigation={navigation} />}
             {activeTab === 'Shared' && <SharedTab data={data.shared} />}
           </>
         ) : (
