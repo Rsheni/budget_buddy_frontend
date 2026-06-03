@@ -108,7 +108,15 @@ const HomeScreen = ({ navigation }: any) => {
           <>
             {activeTab === 'Personal' && <PersonalTab data={data.personal} />}
             {activeTab === 'Goal Status' && <GoalTab data={data.goals} navigation={navigation} />}
-            {activeTab === 'Shared' && <SharedTab data={data.shared} />}
+            {activeTab === 'Shared' && (
+              <SharedTab 
+                data={data.shared} 
+                onRefresh={async () => {
+                  const result = await fetchHomeData();
+                  setData(result);
+                }} 
+              />
+            )}
           </>
         ) : (
           <Text style={{ textAlign: 'center', marginTop: 50, color: COLORS.textLight }}>Loading...</Text>

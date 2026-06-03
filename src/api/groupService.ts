@@ -157,3 +157,54 @@ export const fetchGroupSettlements = async (groupId: string) => {
     }
 };
 
+export const fetchPendingInvitations = async () => {
+    try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.get(`${API_URL}/groups/invitations/pending`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data.invitations;
+    } catch (error) {
+        console.error('Error fetching pending invitations:', error);
+        return [];
+    }
+};
+
+export const acceptInvitation = async (code: string) => {
+    try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.post(`${API_URL}/groups/invitations/accept`, { code }, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error accepting invitation:', error);
+        throw error;
+    }
+};
+
+export const cancelInvitation = async (groupId: string, invitationId: string) => {
+    try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.delete(`${API_URL}/groups/${groupId}/invitations/${invitationId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error canceling invitation:', error);
+        throw error;
+    }
+};
+
+export const deleteGroup = async (groupId: string) => {
+    try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.delete(`${API_URL}/groups/${groupId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting group:', error);
+        throw error;
+    }
+};

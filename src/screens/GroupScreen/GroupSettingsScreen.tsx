@@ -16,7 +16,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { COLORS } from '../../constants/colors';
-import { fetchGroupSettings, updateGroupSettings, addMembersToGroup, removeMemberFromGroup } from '../../api/groupService';
+import { fetchGroupSettings, updateGroupSettings, addMembersToGroup, removeMemberFromGroup, cancelInvitation, deleteGroup } from '../../api/groupService';
 import CustomBottomNav from '../../navigation/CustomBottomNav';
 import { useAuth } from '../../context/AuthContext';
 
@@ -126,21 +126,26 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
     const handleRemoveMember = (memberId: string, isPending: boolean = false) => {
         Alert.alert(
             'Confirm Removal',
-            'Are you sure you want to remove this member?',
+            isPending ? 'Are you sure you want to cancel this invitation?' : 'Are you sure you want to remove this member?',
             [
                 { text: 'Cancel', style: 'cancel' },
                 { 
-                    text: 'Remove', 
+                    text: isPending ? 'Cancel Invite' : 'Remove', 
                     style: 'destructive',
                     onPress: async () => {
                         try {
                             if (isPending) {
-                                // Add API for canceling invitation if needed, but for now we'll just alert
-                                Alert.alert('Info', 'Pending invitation removal not fully implemented yet.');
+                                await cancelInvitation(groupId, memberId);
+                                Alert.alert('Success', 'Invitation cancelled');
+                                loadSettings();
                             } else {
                                 await removeMemberFromGroup(groupId, memberId);
                                 Alert.alert('Success', 'Member removed');
-                                loadSettings(); // Refresh list
+                                if (memberId === (user?.id || user?._id)) {
+                                    navigation.navigate('Home');
+                                } else {
+                                    loadSettings();
+                                }
                             }
                         } catch (error) {
                             Alert.alert('Error', 'Failed to remove member');
@@ -151,7 +156,30 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
         );
     };
 
-    const isUserAdmin = adminId === user?.id;
+    const handleDeleteGroup = () => {
+        Alert.alert(
+            'Delete Group',
+            'Are you sure you want to permanently delete this group? This action cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await deleteGroup(groupId);
+                            Alert.alert('Success', 'Group deleted');
+                            navigation.navigate('Home');
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to delete group');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const isUserAdmin = adminId === (user?.id || user?._id);
 
     if (loading) {
         return (
@@ -173,13 +201,15 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                     <TouchableOpacity onPress={() => console.log('Notification pressed')} style={[styles.backButton, { marginRight: 8, width: 36, height: 36, borderRadius: 18 }]}>
                         <Icon name="bell-outline" size={20} color={COLORS.primaryDark} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={handleSave} disabled={saving}>
-                        {saving ? (
-                            <ActivityIndicator color={COLORS.primary} size="small" />
-                        ) : (
-                            <Text style={styles.saveButton}>Save</Text>
-                        )}
-                    </TouchableOpacity>
+                    {isUserAdmin && (
+                        <TouchableOpacity onPress={handleSave} disabled={saving}>
+                            {saving ? (
+                                <ActivityIndicator color={COLORS.primary} size="small" />
+                            ) : (
+                                <Text style={styles.saveButton}>Save</Text>
+                            )}
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
 
@@ -190,7 +220,7 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                     <Text style={styles.sectionTitle}>GROUP INFO</Text>
                     <View style={styles.card}>
                         <View style={styles.groupInfoRow}>
-                            <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+                            <TouchableOpacity onPress={isUserAdmin ? pickImage : undefined} style={styles.imagePicker} disabled={!isUserAdmin}>
                                 {coverPhoto ? (
                                     <Image source={{ uri: coverPhoto }} style={styles.coverImage} />
                                 ) : (
@@ -203,6 +233,7 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                                     style={styles.input}
                                     value={groupName}
                                     onChangeText={setGroupName}
+                                    editable={isUserAdmin}
                                 />
                             </View>
                         </View>
@@ -223,6 +254,7 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                                 onValueChange={setSimplifyDebts}
                                 trackColor={{ false: '#E5E7EB', true: COLORS.primary }}
                                 thumbColor={Platform.OS === 'android' ? COLORS.white : ''}
+                                disabled={!isUserAdmin}
                             />
                         </View>
                         <View style={[styles.preferenceRow, { borderBottomWidth: 0 }]}>
@@ -237,6 +269,7 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                                 onValueChange={setMembersCanInvite}
                                 trackColor={{ false: '#E5E7EB', true: COLORS.primary }}
                                 thumbColor={Platform.OS === 'android' ? COLORS.white : ''}
+                                disabled={!isUserAdmin}
                             />
                         </View>
                     </View>
@@ -266,19 +299,23 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                     <View style={styles.card}>
                         
                         {/* Add Member Input */}
-                        <View style={styles.addMemberRow}>
-                            <TextInput
-                                style={styles.addMemberInput}
-                                placeholder="Email or phone number"
-                                value={memberInput}
-                                onChangeText={setMemberInput}
-                                onSubmitEditing={handleAddMember}
-                            />
-                            <TouchableOpacity style={styles.addMemberBtnSmall} onPress={handleAddMember}>
-                                <Icon name="plus" size={18} color={COLORS.primary} />
-                                <Text style={styles.addMemberBtnText}>Add</Text>
-                            </TouchableOpacity>
-                        </View>
+                        {isUserAdmin && (
+                            <View style={{ marginBottom: 20 }}>
+                                <View style={styles.inviteInputWrapper}>
+                                    <TextInput
+                                        style={styles.inviteInput}
+                                        placeholder="Email or phone number"
+                                        placeholderTextColor="#999"
+                                        value={memberInput}
+                                        onChangeText={setMemberInput}
+                                        onSubmitEditing={handleAddMember}
+                                    />
+                                    <TouchableOpacity style={styles.addMemberBtn} onPress={handleAddMember}>
+                                        <Icon name="plus" size={20} color={COLORS.white} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        )}
 
                         {/* Accepted Members List */}
                         {members.map((m) => (
@@ -288,13 +325,17 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                                     <View>
                                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                             <Text style={styles.memberName}>{m.name || m.email}</Text>
-                                            {m.isAdmin && <View style={styles.tagAdmin}><Text style={styles.tagTextAdmin}>ADMIN</Text></View>}
-                                            {m.id === user?.id && <View style={styles.tagYou}><Text style={styles.tagTextYou}>YOU</Text></View>}
+                                            {m.isAdmin ? (
+                                                <View style={styles.tagAdmin}><Text style={styles.tagTextAdmin}>ADMIN</Text></View>
+                                            ) : (
+                                                <View style={styles.tagMember}><Text style={styles.tagTextMember}>MEMBER</Text></View>
+                                            )}
+                                            {m.id === (user?.id || user?._id) && <View style={styles.tagYou}><Text style={styles.tagTextYou}>YOU</Text></View>}
                                         </View>
                                         <Text style={styles.memberDate}>Joined {new Date(m.joinedAt).toLocaleDateString()}</Text>
                                     </View>
                                 </View>
-                                {(!m.isAdmin && (isUserAdmin || m.id === user?.id)) && (
+                                {(!m.isAdmin && (isUserAdmin || m.id === (user?.id || user?._id))) && (
                                     <TouchableOpacity onPress={() => handleRemoveMember(m.id)}>
                                         <Text style={styles.removeText}>Remove</Text>
                                     </TouchableOpacity>
@@ -303,41 +344,41 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                         ))}
 
                         {/* Pending Invitations List */}
-                        {pendingInvitations.length > 0 && (
-                            <View style={{ marginTop: 10 }}>
-                                <Text style={styles.subSectionTitle}>Pending Invitations</Text>
-                                {pendingInvitations.map((inv) => (
-                                    <View key={inv.id} style={styles.memberItem}>
-                                        <View style={styles.memberInfo}>
-                                            <View style={[styles.memberAvatar, { backgroundColor: '#F3F4F6', justifyContent: 'center', alignItems: 'center' }]}>
-                                                <Icon name="email" size={20} color="#9CA3AF" />
-                                            </View>
-                                            <View>
-                                                <Text style={styles.memberName}>{inv.emailOrPhone}</Text>
-                                                <Text style={styles.memberDate}>Invited (Pending)</Text>
-                                            </View>
-                                        </View>
-                                        {(isUserAdmin) && (
-                                            <TouchableOpacity onPress={() => handleRemoveMember(inv.id, true)}>
-                                                <Text style={styles.removeText}>Cancel</Text>
-                                            </TouchableOpacity>
-                                        )}
+                        {pendingInvitations.map((inv) => (
+                            <View key={inv.id} style={styles.memberItem}>
+                                <View style={styles.memberInfo}>
+                                    <View style={[styles.memberAvatar, { backgroundColor: '#F3F4F6', justifyContent: 'center', alignItems: 'center' }]}>
+                                        <Icon name="email" size={20} color="#9CA3AF" />
                                     </View>
-                                ))}
+                                    <View>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Text style={styles.memberName}>{inv.emailOrPhone}</Text>
+                                            <View style={styles.tagPending}><Text style={styles.tagTextPending}>PENDING</Text></View>
+                                        </View>
+                                        <Text style={styles.memberDate}>Invited by {inv.invitedBy || 'Admin'}</Text>
+                                    </View>
+                                </View>
+                                {(isUserAdmin) && (
+                                    <TouchableOpacity onPress={() => handleRemoveMember(inv.id, true)}>
+                                        <Text style={styles.removeText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
-                        )}
+                        ))}
                     </View>
 
                     {/* DANGER ZONE */}
                     <Text style={[styles.sectionTitle, { color: '#EF4444' }]}>DANGER ZONE</Text>
                     <View style={[styles.card, { padding: 15 }]}>
-                        <TouchableOpacity style={styles.dangerButtonOutline}>
-                            <Text style={styles.dangerButtonText}>Leave Group</Text>
-                        </TouchableOpacity>
+                        {!isUserAdmin && (
+                            <TouchableOpacity style={styles.dangerButtonOutline} onPress={() => handleRemoveMember((user?.id || user?._id), false)}>
+                                <Text style={styles.dangerButtonText}>Leave Group</Text>
+                            </TouchableOpacity>
+                        )}
                         
                         {isUserAdmin && (
-                            <TouchableOpacity style={{ alignItems: 'center', marginTop: 15 }}>
-                                <Text style={styles.dangerTextPlain}>Delete Group permanently</Text>
+                            <TouchableOpacity style={styles.dangerButtonOutline} onPress={handleDeleteGroup}>
+                                <Text style={styles.dangerButtonText}>Delete Group permanently</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -493,6 +534,27 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginLeft: 4,
     },
+    inviteInputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F5F6FA',
+        borderRadius: 12,
+        paddingHorizontal: 10,
+    },
+    inviteInput: {
+        flex: 1,
+        paddingVertical: 15,
+        fontSize: 16,
+        color: COLORS.primaryDark,
+    },
+    addMemberBtn: {
+        backgroundColor: COLORS.primary,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     memberItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -544,6 +606,30 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: 'bold',
         color: '#0EA5E9',
+    },
+    tagMember: {
+        backgroundColor: '#FEF3C7',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        marginLeft: 8,
+    },
+    tagTextMember: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#D97706',
+    },
+    tagPending: {
+        backgroundColor: '#E5E7EB',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        marginLeft: 8,
+    },
+    tagTextPending: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#4B5563',
     },
     removeText: {
         color: '#EF4444',

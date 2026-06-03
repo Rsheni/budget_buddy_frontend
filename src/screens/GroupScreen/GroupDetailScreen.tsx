@@ -157,14 +157,6 @@ const GroupDetailScreen = ({ route, navigation }: any) => {
                     </View>
                 </View>
 
-                {/* Total Spend */}
-                <View style={styles.totalSpendContainer}>
-                    <Text style={styles.totalSpendLabel}>TOTAL GROUP SPEND</Text>
-                    <Text style={styles.totalSpendAmount}>
-                        Rs. {Math.round(groupData.totalSpend || 0).toLocaleString()}
-                    </Text>
-                </View>
-
                 {/* Settle Up Button */}
                 <TouchableOpacity 
                     style={styles.settleUpBtn}
@@ -184,7 +176,7 @@ const GroupDetailScreen = ({ route, navigation }: any) => {
                     activeOpacity={0.8}
                 >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={styles.boxLabel}>To Receive</Text>
+                        <Text style={styles.boxLabel}>to received</Text>
                         <Icon name={receiveExpanded ? "chevron-up" : "chevron-down"} size={16} color="#6B7280" />
                     </View>
                     <Text style={styles.boxAmount}>
