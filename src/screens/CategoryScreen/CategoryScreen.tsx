@@ -4,6 +4,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../../constants/colors';
 import { fetchCategories } from '../../api/categoryService';
 import CustomBottomNav from '../../navigation/CustomBottomNav';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 // 1. Define the Interface
 interface CategoryItem {
@@ -59,7 +60,9 @@ const CategoryScreen = () => {
              <Image source={{ uri: 'https://img.icons8.com/ios/50/093030/left.png' }} style={styles.navIcon} />
            </TouchableOpacity>
            <Text style={styles.headerTitle}>Categories</Text>
-           <View style={styles.navIcon}><Text>🔔</Text></View>
+           <TouchableOpacity onPress={() => console.log('Notification pressed')}>
+             <Icon name="notifications-outline" size={24} color="#333" />
+           </TouchableOpacity>
         </View>
 
         {/* Toggle Switch */}

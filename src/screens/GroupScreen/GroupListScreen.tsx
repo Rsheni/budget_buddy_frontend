@@ -43,7 +43,11 @@ const GroupListScreen = ({ navigation }: any) => {
 
       {/* Header */}
       <View style={styles.header}>
+        <View style={{ width: 24 }} />
         <Text style={styles.headerTitle}>Groups</Text>
+        <TouchableOpacity onPress={() => console.log('Notification pressed')}>
+          <Icon name="bell-outline" size={24} color="#1F2937" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -166,7 +170,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingBottom: 10,
-    alignItems: 'center'
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,

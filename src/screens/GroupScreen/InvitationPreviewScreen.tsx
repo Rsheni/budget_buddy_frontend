@@ -18,8 +18,9 @@ const InvitationPreviewScreen = ({ route, navigation }: any) => {
                     <Icon name="chevron-left" size={32} color="#1F2937" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Invitation Preview</Text>
-                {/* Placeholder for balance */}
-                <View style={{ width: 40 }} />
+                <TouchableOpacity onPress={() => console.log('Notification pressed')} style={styles.backButton}>
+                    <Icon name="bell-outline" size={24} color="#1F2937" />
+                </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

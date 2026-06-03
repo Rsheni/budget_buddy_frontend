@@ -69,6 +69,11 @@ const CategoryDetailScreen = ({ route }: any) => {
         <Text style={styles.headerTitle}>{category.categoryName}</Text>
 
         <View style={styles.actionIcons}>
+          {/* Notification Button */}
+          <TouchableOpacity onPress={() => console.log('Notification pressed')} style={{ marginRight: 15 }}>
+            <Image source={{ uri: 'https://img.icons8.com/ios/50/093030/appointment-reminders.png' }} style={styles.navIcon} />
+          </TouchableOpacity>
+
           {/* Edit Button */}
           <TouchableOpacity onPress={() => navigation.navigate('CreateCategory', { categoryToEdit: category })}>
             <Image source={{ uri: 'https://img.icons8.com/ios/50/093030/edit.png' }} style={styles.navIcon} />

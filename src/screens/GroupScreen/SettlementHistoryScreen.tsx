@@ -106,7 +106,9 @@ const SettlementHistoryScreen = ({ route, navigation }: any) => {
                     <Icon name="chevron-left" size={28} color="#1F2937" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Settlement History</Text>
-                <View style={{ width: 40 }} />
+                <TouchableOpacity onPress={() => console.log('Notification pressed')} style={styles.backButton}>
+                    <Icon name="bell-outline" size={24} color="#1F2937" />
+                </TouchableOpacity>
             </View>
 
             {/* Total Debt Settled Card */}

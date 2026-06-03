@@ -80,7 +80,11 @@ const CreateCategoryScreen = ({ navigation, route }: any) => {
                     {/* ✨ Delete Icon */}
                     {isEditMode ? (
                         <TouchableOpacity onPress={handleDelete}><Text style={{ fontSize: 20 }}>🗑️</Text></TouchableOpacity>
-                    ) : <Text>🔔</Text>}
+                    ) : (
+                      <TouchableOpacity onPress={() => console.log('Notification pressed')}>
+                        <Image source={{ uri: 'https://img.icons8.com/ios/50/093030/appointment-reminders.png' }} style={{ width: 24, height: 24 }} />
+                      </TouchableOpacity>
+                    )}
                 </View>
 
                 <View style={styles.formContainer}>

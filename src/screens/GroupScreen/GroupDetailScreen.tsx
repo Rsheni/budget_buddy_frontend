@@ -141,12 +141,20 @@ const GroupDetailScreen = ({ route, navigation }: any) => {
                     
                     <Text style={styles.headerTitle}>{groupData.name}</Text>
                     
-                    <TouchableOpacity 
-                        style={styles.iconCircle}
-                        onPress={() => navigation.navigate('GroupSettings', { groupId: groupData.id })}
-                    >
-                        <Icon name="cog" size={24} color={COLORS.white} />
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity 
+                            style={[styles.iconCircle, { marginRight: 8 }]}
+                            onPress={() => console.log('Notification pressed')}
+                        >
+                            <Icon name="bell-outline" size={24} color={COLORS.white} />
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={styles.iconCircle}
+                            onPress={() => navigation.navigate('GroupSettings', { groupId: groupData.id })}
+                        >
+                            <Icon name="cog" size={24} color={COLORS.white} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Total Spend */}

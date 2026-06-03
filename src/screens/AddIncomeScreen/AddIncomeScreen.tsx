@@ -6,6 +6,7 @@ import { COLORS } from '../../constants/colors';
 import { addIncome, updateIncome, deleteIncome } from '../../api/transactionService';
 import { fetchCategories } from '../../api/categoryService';
 import CustomBottomNav from '../../navigation/CustomBottomNav';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const { height } = Dimensions.get('window');
 
@@ -157,7 +158,11 @@ const AddIncomeScreen = ({ navigation, route }: any) => {
           <Text style={styles.headerTitle}>{isEditMode ? `Edit ${isExpense ? 'Expense' : 'Income'}` : `Add ${isExpense ? 'Expense' : 'Income'}`}</Text>
           {isEditMode ? (
             <TouchableOpacity onPress={handleDelete}><Text style={{ fontSize: 20 }}>🗑️</Text></TouchableOpacity>
-          ) : <Text style={{ fontSize: 20 }}>🔔</Text>}
+          ) : (
+            <TouchableOpacity onPress={() => console.log('Notification pressed')}>
+              <Icon name="notifications-outline" size={24} color="#333" />
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.formContainer}>

@@ -103,8 +103,9 @@ const CreateGroupScreen = ({ navigation }: any) => {
                     <Icon name="chevron-left" size={30} color={COLORS.primaryDark} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Create New Group</Text>
-                {/* Placeholder for balance */}
-                <View style={{ width: 40 }} />
+                <TouchableOpacity onPress={() => console.log('Notification pressed')} style={styles.backButton}>
+                    <Icon name="bell-outline" size={24} color={COLORS.primaryDark} />
+                </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>

@@ -121,9 +121,14 @@ const GoalDetailsScreen = ({ navigation, route }: any) => {
           <Icon name="chevron-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Goal Details</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('EditGoal', { goalId: goal._id })}>
-          <Icon name="pencil" size={20} color="#333" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => console.log('Notification pressed')} style={{ marginRight: 15 }}>
+            <Icon name="notifications-outline" size={22} color="#333" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('EditGoal', { goalId: goal._id })}>
+            <Icon name="pencil" size={20} color="#333" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

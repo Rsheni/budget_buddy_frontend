@@ -73,7 +73,9 @@ const CreateGoalScreen = ({ navigation }: any) => {
           <Icon name="chevron-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create New Goal</Text>
-        <View style={{ width: 24 }} />
+        <TouchableOpacity onPress={() => console.log('Notification pressed')}>
+          <Icon name="notifications-outline" size={24} color="#333" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

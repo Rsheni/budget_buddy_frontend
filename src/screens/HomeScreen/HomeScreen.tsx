@@ -6,6 +6,7 @@ import { fetchHomeData } from '../../api/homeService';
 import CustomBottomNav from '../../navigation/CustomBottomNav';
 import { useAuth } from '../../context/AuthContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Import Tabs
 import PersonalTab from './PersonalTab';
@@ -62,9 +63,12 @@ const HomeScreen = ({ navigation }: any) => {
 
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {/* Notification Icon */}
-            <View style={[styles.bellIcon, { marginRight: 10 }]}>
-              <Image source={{ uri: 'https://img.icons8.com/ios/50/ffffff/appointment-reminders.png' }} style={{ width: 24, height: 24 }} />
-            </View>
+            <TouchableOpacity 
+              style={[styles.bellIcon, { marginRight: 10 }]} 
+              onPress={() => console.log('Notification pressed')}
+            >
+              <Ionicons name="notifications-outline" size={24} color="white" />
+            </TouchableOpacity>
 
             {/* Logout Button */}
             <TouchableOpacity style={styles.bellIcon} onPress={handleLogout}>

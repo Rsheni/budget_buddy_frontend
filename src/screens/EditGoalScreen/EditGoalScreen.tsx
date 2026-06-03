@@ -141,9 +141,14 @@ const EditGoalScreen = ({ navigation, route }: any) => {
           <Icon name="close" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Goal</Text>
-        <TouchableOpacity onPress={handleUpdateGoal} disabled={saving}>
-          {saving ? <ActivityIndicator size="small" color="#00D09E" /> : <Text style={styles.saveText}>Save</Text>}
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => console.log('Notification pressed')} style={{ marginRight: 15 }}>
+            <Icon name="notifications-outline" size={22} color="#333" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleUpdateGoal} disabled={saving}>
+            {saving ? <ActivityIndicator size="small" color="#00D09E" /> : <Text style={styles.saveText}>Save</Text>}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

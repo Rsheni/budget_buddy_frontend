@@ -213,6 +213,7 @@ import { COLORS } from '../../constants/colors';
 import { fetchTransactions } from '../../api/transactionService';
 import CustomBottomNav from '../../navigation/CustomBottomNav';
 import BalanceCard from '../../components/Home/BalanceCard';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const TransactionScreen = () => {
   const navigation = useNavigation<any>();
@@ -268,7 +269,9 @@ const TransactionScreen = () => {
             <Image source={{ uri: 'https://img.icons8.com/ios/50/093030/left.png' }} style={styles.navIcon} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Transaction</Text>
-          <View style={styles.navIcon}><Text style={{ fontSize: 20 }}>🔔</Text></View>
+          <TouchableOpacity onPress={() => console.log('Notification pressed')}>
+            <Icon name="notifications-outline" size={24} color="#333" />
+          </TouchableOpacity>
         </View>
 
         {/* BALANCE */}

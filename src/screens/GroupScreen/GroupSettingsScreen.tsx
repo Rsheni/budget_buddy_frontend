@@ -169,13 +169,18 @@ const GroupSettingsScreen = ({ route, navigation }: any) => {
                     <Icon name="chevron-left" size={30} color={COLORS.primaryDark} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Group Settings</Text>
-                <TouchableOpacity onPress={handleSave} disabled={saving}>
-                    {saving ? (
-                        <ActivityIndicator color={COLORS.primary} size="small" />
-                    ) : (
-                        <Text style={styles.saveButton}>Save</Text>
-                    )}
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity onPress={() => console.log('Notification pressed')} style={[styles.backButton, { marginRight: 8, width: 36, height: 36, borderRadius: 18 }]}>
+                        <Icon name="bell-outline" size={20} color={COLORS.primaryDark} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleSave} disabled={saving}>
+                        {saving ? (
+                            <ActivityIndicator color={COLORS.primary} size="small" />
+                        ) : (
+                            <Text style={styles.saveButton}>Save</Text>
+                        )}
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>

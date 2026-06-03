@@ -105,7 +105,9 @@ const SettleUpScreen = ({ route, navigation }: any) => {
                     <Icon name="arrow-left" size={24} color={COLORS.white} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Settle Up</Text>
-                <View style={{ width: 40 }} />
+                <TouchableOpacity onPress={() => console.log('Notification pressed')} style={styles.backButton}>
+                    <Icon name="bell-outline" size={24} color={COLORS.white} />
+                </TouchableOpacity>
             </View>
 
             {/* Total Balance Owed Summary */}
