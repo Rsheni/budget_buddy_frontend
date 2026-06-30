@@ -79,7 +79,7 @@ const AddGroupExpenseScreen = ({ route, navigation }: any) => {
             return;
         }
 
-        const selectedMembers = memberSplits.filter(m => m.selected);
+        const selectedMembers = memberSplits.filter((m: any) => m.selected);
         if (selectedMembers.length === 0) {
             Alert.alert('Validation Error', 'You must select at least one member to split the expense with.');
             return;
@@ -124,7 +124,7 @@ const AddGroupExpenseScreen = ({ route, navigation }: any) => {
             formData.append('paidById', paidById);
             formData.append('splitMethod', splitMethod);
 
-            const splitsData = selectedMembers.map(m => ({
+            const splitsData = selectedMembers.map((m: any) => ({
                 userId: m.userId,
                 percentage: splitMethod === 'percentage' ? parseFloat(m.percentage) : 0,
                 amount: splitMethod === 'exact' ? parseFloat(m.amount) : 0
@@ -259,7 +259,7 @@ const AddGroupExpenseScreen = ({ route, navigation }: any) => {
 
                         {/* Member List for Splitting */}
                         <View style={styles.splitMembersList}>
-                            {memberSplits.map((m, index) => (
+                            {memberSplits.map((m: any, index: number) => (
                                 <View key={m.userId} style={styles.splitMemberRow}>
                                     <TouchableOpacity 
                                         style={styles.memberCheckbox} 
@@ -302,7 +302,7 @@ const AddGroupExpenseScreen = ({ route, navigation }: any) => {
                                     {m.selected && splitMethod === 'equal' && (
                                         <Text style={styles.autoCalculatedText}>
                                             Rs. {totalAmount && !isNaN(parseFloat(totalAmount)) 
-                                                ? (parseFloat(totalAmount) / memberSplits.filter(ms => ms.selected).length).toFixed(2) 
+                                                ? (parseFloat(totalAmount) / memberSplits.filter((ms: any) => ms.selected).length).toFixed(2) 
                                                 : "0.00"}
                                         </Text>
                                     )}

@@ -6,20 +6,51 @@ import {
     TouchableOpacity,
     FlatList,
     ActivityIndicator,
-    Image,
     SafeAreaView,
     StatusBar,
-    Platform
+    Platform,
+    Alert,
+    Modal,
+    TextInput,
+    KeyboardAvoidingView,
+    ScrollView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS } from '../../constants/colors';
-import { fetchGroupBalances } from '../../api/groupService';
+import { fetchGroupBalances, createSettlement } from '../../api/groupService';
+
+// Pastel theme colors for initials avatars
+const AVATAR_COLORS = ['#E0F2FE', '#F3E8FF', '#FEE2E2', '#FEF3C7', '#D1FAE5'];
+const TEXT_COLORS = ['#0369A1', '#7E22CE', '#B91C1C', '#B45309', '#047857'];
+
+const getInitials = (name: string) => {
+    if (!name) return 'U';
+    return name
+        .split(' ')
+        .map(part => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+};
+
+const getColorIndex = (name: string) => {
+    let sum = 0;
+    for (let i = 0; i < name.length; i++) {
+        sum += name.charCodeAt(i);
+    }
+    return sum % AVATAR_COLORS.length;
+};
 
 const SettleUpScreen = ({ route, navigation }: any) => {
     const { groupId, groupName } = route.params;
     const [loading, setLoading] = useState(true);
     const [debtsToPay, setDebtsToPay] = useState<any[]>([]);
-    const [settledMembers, setSettledMembers] = useState<string[]>([]);
+
+    // Modal states
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedMember, setSelectedMember] = useState<any>(null);
+    const [settleAmount, setSettleAmount] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     const loadBalances = async () => {
         setLoading(true);
@@ -37,58 +68,124 @@ const SettleUpScreen = ({ route, navigation }: any) => {
         loadBalances();
     }, [groupId]);
 
-    // Handle return from SettlePaymentScreen
+    // Refresh balances when returning back from SettlePayment screen
     useEffect(() => {
-        if (route.params?.settledMemberId) {
-            const settledId = route.params.settledMemberId;
-            if (!settledMembers.includes(settledId)) {
-                setSettledMembers(prev => [...prev, settledId]);
-            }
-            loadBalances(); // Refresh the list of debts from backend
-        }
-    }, [route.params?.settledMemberId]);
+        const unsubscribe = navigation.addListener('focus', () => {
+            loadBalances();
+        });
+        return unsubscribe;
+    }, [navigation]);
 
-    const totalOwed = debtsToPay.reduce((sum, d) => {
-        // Only count if not locally settled yet
-        if (settledMembers.includes(d.memberId)) return sum;
-        return sum + d.amount;
-    }, 0);
+    const totalOwed = debtsToPay.reduce((sum, d) => sum + d.amount, 0);
+
+    const handleOpenHandOver = (member: any) => {
+        setSelectedMember(member);
+        setSettleAmount(Math.round(member.amount).toString());
+        setModalVisible(true);
+    };
+
+    const handleHandOverSubmit = async () => {
+        if (!settleAmount.trim() || isNaN(Number(settleAmount)) || Number(settleAmount) <= 0) {
+            Alert.alert('Invalid Amount', 'Please enter a valid payment amount.');
+            return;
+        }
+
+        const payAmount = Number(settleAmount);
+        const totalOwedToMember = selectedMember.amount;
+
+        if (payAmount > totalOwedToMember + 0.01) {
+            Alert.alert('Invalid Amount', `You only owe Rs. ${Math.round(totalOwedToMember).toLocaleString()} to ${selectedMember.name}.`);
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const payload = {
+                receiverId: selectedMember.memberId,
+                amount: payAmount,
+                paymentMethod: 'cash',
+                notes: 'Hand over cash'
+            };
+
+            await createSettlement(groupId, payload);
+            setModalVisible(false);
+
+            // Fetch updated balances
+            const data = await fetchGroupBalances(groupId);
+            setDebtsToPay(data.debtsToPay || []);
+
+            // Check if user paid full amount or partial
+            const remaining = totalOwedToMember - payAmount;
+            if (remaining <= 0.05) {
+                Alert.alert(
+                    'Settlement Recorded',
+                    `You hand over money Rs. ${payAmount.toLocaleString()} to ${selectedMember.name}. You paid all!`,
+                    [{ text: 'OK' }]
+                );
+            } else {
+                Alert.alert(
+                    'Settlement Recorded',
+                    `You hand over money Rs. ${payAmount.toLocaleString()} to ${selectedMember.name}. Remaining balance: Rs. ${Math.round(remaining).toLocaleString()}`,
+                    [{ text: 'OK' }]
+                );
+            }
+        } catch (error: any) {
+            console.error('Error creating cash settlement:', error);
+            Alert.alert('Error', error.response?.data?.message || 'Failed to record settlement.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     const renderDebtItem = ({ item }: { item: any }) => {
-        const isSettled = settledMembers.includes(item.memberId);
+        const colorIdx = getColorIndex(item.name);
 
         return (
             <View style={styles.debtCard}>
-                <View style={styles.debtInfo}>
-                    <Image 
-                        source={{ uri: item.profilePicture || `https://ui-avatars.com/api/?name=${item.name}` }} 
-                        style={styles.avatar} 
-                    />
-                    <View style={styles.textContainer}>
-                        <Text style={styles.memberName}>{item.name}</Text>
-                        <Text style={styles.debtLabel}>
-                            {isSettled ? 'Paid successfully' : 'You owe'}
+                <View style={styles.cardHeader}>
+                    <View style={styles.debtInfo}>
+                        <View style={[styles.avatarCircle, { backgroundColor: AVATAR_COLORS[colorIdx] }]}>
+                            <Text style={[styles.avatarText, { color: TEXT_COLORS[colorIdx] }]}>
+                                {getInitials(item.name)}
+                            </Text>
+                        </View>
+                        <View style={styles.textContainer}>
+                            <Text style={styles.memberName}>{item.name}</Text>
+                            <Text style={styles.oweLabel}>You owe</Text>
+                        </View>
+                    </View>
+                    
+                    <View style={styles.amountContainer}>
+                        <Text style={styles.amountText}>
+                            Rs. {Math.round(item.amount).toLocaleString()}
                         </Text>
                     </View>
                 </View>
-                
-                <View style={styles.actionContainer}>
-                    <Text style={[styles.amountText, isSettled && styles.settledText]}>
-                        Rs. {Math.round(item.amount).toLocaleString()}
-                    </Text>
+
+                {/* Two Action Buttons side-by-side */}
+                <View style={styles.buttonRow}>
                     <TouchableOpacity 
-                        style={[styles.settleBtn, isSettled && styles.settledBtn]}
-                        disabled={isSettled}
+                        style={styles.handOverBtn}
+                        onPress={() => handleOpenHandOver(item)}
+                        activeOpacity={0.8}
+                    >
+                        <Icon name="hand-pointing-right" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
+                        <Text style={styles.handOverBtnText}>Hand Over Money</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        style={styles.bankTransferBtn}
                         onPress={() => navigation.navigate('SettlePayment', {
                             groupId,
                             receiverId: item.memberId,
                             receiverName: item.name,
-                            amount: item.amount
+                            amount: item.amount,
+                            paymentMethod: 'bank'
                         })}
+                        activeOpacity={0.8}
                     >
-                        <Text style={[styles.settleBtnText, isSettled && styles.settledBtnText]}>
-                            {isSettled ? 'Settled' : 'Settle'}
-                        </Text>
+                        <Icon name="bank" size={16} color="#00C896" style={{ marginRight: 6 }} />
+                        <Text style={styles.bankTransferBtnText}>Bank Transfer</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -97,28 +194,31 @@ const SettleUpScreen = ({ route, navigation }: any) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor="#00C896" barStyle="light-content" />
+            <StatusBar backgroundColor="#F9FAFB" barStyle="dark-content" />
             
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Icon name="arrow-left" size={24} color={COLORS.white} />
+                    <Icon name="chevron-left" size={28} color="#1F2937" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Settle Up</Text>
-                <TouchableOpacity onPress={() => console.log('Notification pressed')} style={styles.backButton}>
-                    <Icon name="bell-outline" size={24} color={COLORS.white} />
+                <TouchableOpacity 
+                    onPress={() => navigation.navigate('SettlementHistory', { groupId })} 
+                    style={styles.historyTextButton}
+                >
+                    <Text style={styles.historyBtnText}>History</Text>
                 </TouchableOpacity>
             </View>
 
-            {/* Total Balance Owed Summary */}
+            {/* Total Balance Owed Summary Card (Red theme matching mockup) */}
             <View style={styles.summaryCard}>
-                <Text style={styles.summaryLabel}>TOTAL BALANCE TO PAY BACK</Text>
-                <Text style={styles.summaryAmount}>
-                    Rs. {Math.round(totalOwed).toLocaleString()}
-                </Text>
-                <Text style={styles.summarySubtext}>
-                    {groupName}
-                </Text>
+                <Text style={styles.summaryLabel}>TOTAL BALANCE</Text>
+                <View style={styles.amountRow}>
+                    <Text style={styles.summaryAmount}>
+                        Rs. {Math.round(totalOwed).toLocaleString()}
+                    </Text>
+                    <Text style={styles.summarySubtext}>to pay back</Text>
+                </View>
             </View>
 
             <View style={styles.body}>
@@ -133,15 +233,75 @@ const SettleUpScreen = ({ route, navigation }: any) => {
                         <Text style={styles.emptySubtext2}>No outstanding payments to make in this group.</Text>
                     </View>
                 ) : (
-                    <FlatList
-                        data={debtsToPay}
-                        keyExtractor={(item) => item.memberId}
-                        renderItem={renderDebtItem}
-                        contentContainerStyle={styles.listContent}
-                        showsVerticalScrollIndicator={false}
-                    />
+                    /* Wrap in a container to enforce the 3 items height limit and show scroll */
+                    <View style={styles.listContainer}>
+                        <FlatList
+                            data={debtsToPay}
+                            keyExtractor={(item) => item.memberId}
+                            renderItem={renderDebtItem}
+                            contentContainerStyle={styles.listContent}
+                            showsVerticalScrollIndicator={true}
+                        />
+                    </View>
                 )}
             </View>
+
+            {/* Hand Over Money Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.modalOverlay}
+                >
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Hand Over Money</Text>
+                            <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                <Icon name="close" size={24} color="#6B7280" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {selectedMember && (
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                <Text style={styles.modalSubtitle}>
+                                    Pay back cash directly to <Text style={{ fontWeight: 'bold' }}>{selectedMember.name}</Text>
+                                </Text>
+                                <Text style={styles.modalOwedInfo}>
+                                    Total Debt: Rs. {Math.round(selectedMember.amount).toLocaleString()}
+                                </Text>
+
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.inputLabel}>Amount to pay (Rs.)</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        value={settleAmount}
+                                        onChangeText={setSettleAmount}
+                                        keyboardType="numeric"
+                                        placeholder="0.00"
+                                        autoFocus
+                                    />
+                                </View>
+
+                                <TouchableOpacity
+                                    style={[styles.modalSubmitBtn, submitting && styles.disabledBtn]}
+                                    disabled={submitting}
+                                    onPress={handleHandOverSubmit}
+                                >
+                                    {submitting ? (
+                                        <ActivityIndicator size="small" color={COLORS.white} />
+                                    ) : (
+                                        <Text style={styles.modalSubmitBtnText}>Settle</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </ScrollView>
+                        )}
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -152,91 +312,124 @@ const styles = StyleSheet.create({
         backgroundColor: '#F9FAFB',
     },
     header: {
-        backgroundColor: '#00C896',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 15,
         paddingHorizontal: 20,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 15,
+        backgroundColor: '#F9FAFB',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
     },
     backButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     headerTitle: {
-        color: COLORS.white,
-        fontSize: 20,
+        color: '#1F2937',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    historyTextButton: {
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    historyBtnText: {
+        color: '#00C896',
+        fontSize: 16,
         fontWeight: 'bold',
     },
     summaryCard: {
-        backgroundColor: '#00C896',
-        paddingHorizontal: 20,
-        paddingBottom: 30,
-        alignItems: 'center',
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
+        backgroundColor: COLORS.white,
+        borderRadius: 20,
+        padding: 20,
+        marginHorizontal: 20,
+        marginVertical: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: '#F3F4F6',
     },
     summaryLabel: {
-        color: 'rgba(255, 255, 255, 0.8)',
-        fontSize: 12,
+        color: '#9CA3AF',
+        fontSize: 11,
         fontWeight: 'bold',
         letterSpacing: 1,
-        marginBottom: 5,
+        marginBottom: 8,
+    },
+    amountRow: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
     },
     summaryAmount: {
-        color: COLORS.white,
-        fontSize: 32,
+        color: '#EF4444', // Red color for outstanding debts
+        fontSize: 30,
         fontWeight: 'bold',
     },
     summarySubtext: {
-        color: 'rgba(255, 255, 255, 0.8)',
+        color: '#9CA3AF',
         fontSize: 14,
-        marginTop: 5,
+        marginLeft: 8,
     },
     body: {
         flex: 1,
         paddingHorizontal: 20,
-        paddingTop: 24,
     },
     sectionTitle: {
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: 'bold',
-        color: '#6B7280',
-        marginBottom: 16,
+        color: '#9CA3AF',
+        marginBottom: 12,
         letterSpacing: 0.5,
     },
+    /* Restrict list height to only fit exactly 3 items (~140px each) */
+    listContainer: {
+        maxHeight: 435,
+        backgroundColor: 'transparent',
+    },
     listContent: {
-        paddingBottom: 20,
+        paddingBottom: 10,
     },
     debtCard: {
         backgroundColor: COLORS.white,
         borderRadius: 16,
         padding: 16,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         marginBottom: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.03,
+        shadowOpacity: 0.02,
         shadowRadius: 6,
         elevation: 1,
+        borderWidth: 1,
+        borderColor: '#F3F4F6',
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     debtInfo: {
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
     },
-    avatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+    avatarCircle: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         marginRight: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarText: {
+        fontSize: 15,
+        fontWeight: 'bold',
     },
     textContainer: {
         justifyContent: 'center',
@@ -246,40 +439,55 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#1F2937',
     },
-    debtLabel: {
-        fontSize: 13,
-        color: '#6B7280',
+    oweLabel: {
+        fontSize: 12,
+        color: '#9CA3AF',
         marginTop: 2,
     },
-    actionContainer: {
+    amountContainer: {
         alignItems: 'flex-end',
     },
     amountText: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#EF4444',
-        marginBottom: 6,
     },
-    settleBtn: {
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 14,
+    },
+    handOverBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: '#00C896',
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-        borderRadius: 12,
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginRight: 8,
+        flex: 1,
     },
-    settleBtnText: {
+    handOverBtnText: {
         color: COLORS.white,
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: 'bold',
     },
-    settledText: {
-        color: '#9CA3AF',
-        textDecorationLine: 'line-through',
+    bankTransferBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#00C896',
+        backgroundColor: COLORS.white,
+        borderRadius: 10,
+        paddingVertical: 9, // adjust slightly to balance border width
+        flex: 1,
     },
-    settledBtn: {
-        backgroundColor: '#E5E7EB',
-    },
-    settledBtnText: {
-        color: '#9CA3AF',
+    bankTransferBtnText: {
+        color: '#00C896',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     emptyContainer: {
         alignItems: 'center',
@@ -298,6 +506,82 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 8,
         paddingHorizontal: 30,
+    },
+    // Modal styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: COLORS.white,
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        padding: 24,
+        maxHeight: '80%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1F2937',
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        color: '#4B5563',
+        marginBottom: 4,
+    },
+    modalOwedInfo: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#9CA3AF',
+        marginBottom: 20,
+    },
+    inputGroup: {
+        marginBottom: 20,
+    },
+    inputLabel: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#4B5563',
+        marginBottom: 8,
+    },
+    input: {
+        backgroundColor: '#F9FAFB',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: 12,
+        padding: 15,
+        fontSize: 16,
+        color: '#1F2937',
+    },
+    modalSubmitBtn: {
+        backgroundColor: '#00C896',
+        paddingVertical: 16,
+        borderRadius: 16,
+        alignItems: 'center',
+        marginTop: 10,
+        marginBottom: 20,
+        shadowColor: '#00C896',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
+    },
+    modalSubmitBtnText: {
+        color: COLORS.white,
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    disabledBtn: {
+        backgroundColor: '#9CA3AF',
+        shadowOpacity: 0,
+        elevation: 0,
     },
 });
 

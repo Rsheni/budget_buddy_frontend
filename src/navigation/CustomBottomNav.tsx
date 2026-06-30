@@ -25,11 +25,13 @@ const CustomBottomNav = ({ activeTab, navigation }: BottomNavProps) => {
     } else if (item === 'Wallets' || item === 'Transactions') {
       navigation.navigate('Transactions');
     } else if (item === 'Stats' || item === 'Categories') {
-      navigation.navigate('Categories');
+      navigation.navigate('Analytics');
     } else if (item === 'Goals') {
       navigation.navigate('GoalsDashboard');
     } else if (item === 'Groups') {
       navigation.navigate('Groups');
+    } else if (item === 'Profile') {
+      navigation.navigate('Profile');
     } else {
       console.log(`Navigate to ${item}`);
     }

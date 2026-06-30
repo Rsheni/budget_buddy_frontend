@@ -18,9 +18,9 @@ import { COLORS } from '../../constants/colors';
 import { createSettlement } from '../../api/groupService';
 
 const SettlePaymentScreen = ({ route, navigation }: any) => {
-    const { groupId, receiverId, receiverName, amount } = route.params;
+    const { groupId, receiverId, receiverName, amount, paymentMethod: initialMethod } = route.params;
     
-    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank'>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank'>(initialMethod || 'cash');
     const [settleAmount, setSettleAmount] = useState(Math.round(amount).toString());
     const [notes, setNotes] = useState('Settled expense balance');
     

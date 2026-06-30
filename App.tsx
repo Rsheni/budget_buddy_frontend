@@ -30,6 +30,19 @@ import SettlementHistoryScreen from './src/screens/GroupScreen/SettlementHistory
 import SignInScreen from './src/screens/Auth/SignInScreen';
 import RegisterScreen from './src/screens/Auth/RegisterScreen';
 import SecurityPinScreen from './src/screens/Auth/SecurityPinScreen';
+import ForgotPasswordScreen from './src/screens/Auth/ForgotPasswordScreen';
+import ResetPasswordScreen from './src/screens/Auth/ResetPasswordScreen';
+
+// Profile & Settings Screens
+import ProfileScreen from './src/screens/Profile/ProfileScreen';
+import EditProfileScreen from './src/screens/Profile/EditProfileScreen';
+import SettingsScreen from './src/screens/Profile/SettingsScreen';
+import NotificationSettingsScreen from './src/screens/Profile/NotificationSettingsScreen';
+import PasswordSettingsScreen from './src/screens/Profile/PasswordSettingsScreen';
+import DeleteAccountScreen from './src/screens/Profile/DeleteAccountScreen';
+
+// Analytics Screen
+import AnalyticsScreen from './src/screens/AnalyticsScreen/AnalyticsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +64,8 @@ const Navigation = () => {
             <Stack.Screen name="SignIn" component={SignInScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="SecurityPin" component={SecurityPinScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
           </>
         ) : (
           // Main App Stack
@@ -74,6 +89,13 @@ const Navigation = () => {
             <Stack.Screen name="SettleUp" component={SettleUpScreen} />
             <Stack.Screen name="SettlePayment" component={SettlePaymentScreen} />
             <Stack.Screen name="SettlementHistory" component={SettlementHistoryScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+            <Stack.Screen name="PasswordSettings" component={PasswordSettingsScreen} />
+            <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
+            <Stack.Screen name="Analytics" component={AnalyticsScreen} />
           </>
         )}
       </Stack.Navigator>

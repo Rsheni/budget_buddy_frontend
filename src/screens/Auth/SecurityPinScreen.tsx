@@ -51,11 +51,15 @@ const SecurityPinScreen = ({ navigation, route }: any) => {
         setLoading(true);
         try {
             if (type === 'reset') {
-                // Here you might just verify the pin and then go to ResetPassword
-                // For simplicity, we'll assume the same verify-email logic or separate it
-                // navigation.navigate('ResetPassword', { email, code: fullPin });
-                Alert.alert('Info', 'Password reset logic to be finalized.');
-                navigation.navigate('ResetPassword', { email });
+                const response = await axios.post(`${API_URL}/auth/verify-reset-pin`, {
+                    email,
+                    pin: fullPin,
+                });
+
+                if (response.data.success) {
+                    Alert.alert('Success', 'PIN verified successfully!');
+                    navigation.navigate('ResetPassword', { email, pin: fullPin });
+                }
             } else {
                 const response = await axios.post(`${API_URL}/auth/verify-pin`, {
                     email,
@@ -69,6 +73,22 @@ const SecurityPinScreen = ({ navigation, route }: any) => {
             }
         } catch (error: any) {
             Alert.alert('Verification Failed', error.response?.data?.message || 'Invalid code');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendPin = async () => {
+        setLoading(true);
+        try {
+            if (type === 'reset') {
+                await axios.post(`${API_URL}/auth/forgot-password`, { email });
+                Alert.alert('Success', 'A new verification code has been sent.');
+            } else {
+                Alert.alert('Info', 'Code resending is only supported for password resets.');
+            }
+        } catch (error: any) {
+            Alert.alert('Resend Failed', error.response?.data?.message || 'Failed to resend code');
         } finally {
             setLoading(false);
         }
@@ -117,7 +137,11 @@ const SecurityPinScreen = ({ navigation, route }: any) => {
                     )}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.resendButton} disabled={loading}>
+                <TouchableOpacity 
+                    style={styles.resendButton} 
+                    onPress={handleResendPin}
+                    disabled={loading}
+                >
                     <Text style={styles.resendText}>Send again</Text>
                 </TouchableOpacity>
             </View>

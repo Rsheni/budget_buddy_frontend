@@ -7,17 +7,63 @@ import {
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
+    Alert,
+    ActivityIndicator
 } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import GradientBackground from '../../components/GradientBackground';
+import axios from 'axios';
+import { API_URL } from '../../context/AuthContext';
 
-const ResetPasswordScreen = ({ navigation }: any) => {
+const ResetPasswordScreen = ({ route, navigation }: any) => {
+    const { email, pin } = route.params || { email: '', pin: '' };
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleChangePassword = () => {
-        // Logic to be implemented
-        navigation.navigate('SignIn');
+    const handleChangePassword = async () => {
+        if (!password || !confirmPassword) {
+            Alert.alert('Error', 'Please fill in all fields.');
+            return;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Error', 'Password must be at least 6 characters.');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Alert.alert('Error', 'Passwords do not match.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.post(`${API_URL}/auth/reset-password`, {
+                email,
+                pin,
+                newPassword: password
+            });
+
+            Alert.alert(
+                'Success', 
+                response.data.message || 'Your password has been reset successfully.',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => {
+                            navigation.navigate('SignIn');
+                        }
+                    }
+                ]
+            );
+        } catch (error: any) {
+            console.error('Password reset submit error:', error);
+            const msg = error.response?.data?.message || 'Failed to reset password. Please try again.';
+            Alert.alert('Error', msg);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -61,8 +107,16 @@ const ResetPasswordScreen = ({ navigation }: any) => {
                         />
                     </View>
 
-                    <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
-                        <Text style={styles.buttonText}>Change Password</Text>
+                    <TouchableOpacity 
+                        style={styles.button} 
+                        onPress={handleChangePassword}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color={COLORS.primaryDark} />
+                        ) : (
+                            <Text style={styles.buttonText}>Change Password</Text>
+                        )}
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>

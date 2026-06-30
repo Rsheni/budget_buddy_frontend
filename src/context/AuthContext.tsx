@@ -8,6 +8,7 @@ interface AuthContextType {
     loading: boolean;
     login: (userData: any) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (updatedUser: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -61,8 +62,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         delete axios.defaults.headers.common['Authorization'];
     };
 
+    const updateUser = async (updatedUser: any) => {
+        setUser(updatedUser);
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, token, loading, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

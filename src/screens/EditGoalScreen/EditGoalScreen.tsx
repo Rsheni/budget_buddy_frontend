@@ -459,6 +459,14 @@ const styles = StyleSheet.create({
     color: '#9BA4B5',
     fontWeight: '500',
   },
+  saveChangesButton: {
+    backgroundColor: '#00D09E',
+    borderRadius: 16,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   saveChangesText: {
     color: '#FFF',
     fontSize: 16,
